@@ -3,7 +3,7 @@
 #include "Encoder.h"
 
 // Encoder constantes
-#define´A               12
+#define A               12
 #define B               13
 #define pulseEncoder    600
 #define wheelDiameter   0.6
@@ -12,16 +12,17 @@
 #define enableMotor     11
 #define directionMotor  10
 #define inicioDeCurso   2
+#define PWM             9
 
 
-Encoder steeringEncoder(A,B,pulseEncoder,wheelDiameter);
-Motor steeringMotor(enableMotor.directionMotor,pwm);
+SensorEncoder steeringEncoder(A,B,pulseEncoder,wheelDiameter);
+Motor steeringMotor(enableMotor,directionMotor,PWM);
 
 void setup() {
   Serial.begin(9600);
   Serial.println("Iniciando o programa");
-  sterringEncoder.configuration();
-  sterringMotor.configuration();
+//  sterringEncoder.configuration();
+  steeringMotor.configuration();
   attachInterrupt(digitalPinToInterrupt(inicioDeCurso),desabilitaInterrupcao,RISING);
   Serial.println("Habilitando o motor");
   steeringMotor.turnOnMotor();
@@ -38,7 +39,7 @@ void loop() {
 
 void desabilitaInterrupcao(){
   Serial.println("Interrupção ativa");
-  sterringMotor.turnOffMotor();
-  sterringMotor.setVelocity(0);
+  steeringMotor.turnOffMotor();
+  steeringMotor.setVelocity(0);
   detachInterrupt(digitalPinToInterrupt(inicioDeCurso));
 }
