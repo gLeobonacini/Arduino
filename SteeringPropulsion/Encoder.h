@@ -20,7 +20,7 @@ class SensorEncoder{
 			pinMode(pinBEncoder,INPUT);
 		}
 
-		bool directionMotor(){			
+		bool directionEncoder(){			
 			// Verifica o sentido de rotação do motor:
 			// true -> Anti-horário 
 			// false -> Horário
@@ -72,7 +72,7 @@ class SensorEncoder{
 
 		float encoderVelocity(int timeMillis){		
 			// Retorna a velocidade em diameterUnit/s
-			int count = 0;
+			float count = 0.0;
 			int initialTime = millis();
 
 			do{
@@ -80,6 +80,7 @@ class SensorEncoder{
 					count++;
 			}while(initialTime + timeMillis > millis());
 	
-			return ((count/pulses)*M_PI*wheelDiameter)/(timeMillis/1000); 
+			//return ((count/pulses)*M_PI*wheelDiameter)/(timeMillis/1000); 
+      return count;
 		}	
 };

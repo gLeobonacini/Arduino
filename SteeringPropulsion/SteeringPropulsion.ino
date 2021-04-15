@@ -21,19 +21,31 @@ Motor steeringMotor(enableMotor,directionMotor,PWM);
 void setup() {
   Serial.begin(9600);
   Serial.println("Iniciando o programa");
-//  sterringEncoder.configuration();
+  steeringEncoder.configuration();
   steeringMotor.configuration();
   attachInterrupt(digitalPinToInterrupt(inicioDeCurso),desabilitaInterrupcao,RISING);
   Serial.println("Habilitando o motor");
   steeringMotor.turnOnMotor();
-  Serial.println("Setando velocidade em 10% com sentido true");
-  steeringMotor.rotationDirection(true);
-  steeringMotor.setVelocity(25);
-  
+  //Serial.println("Setando velocidade");
+  //steeringMotor.rotationDirection(true);
+
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
+  //Serial.println("Digite a velocidade de 0 a 255: ");
+  //while(Serial.available() <= 0);
+  //steeringMotor.setVelocity((int)Serial.read());
+  //delay(1000);
+  //steeringMotor.setVelocity(0);
+
+  Serial.println("Começando");
+  
+  //if(steeringEncoder.directionEncoder())
+  //  Serial.println("Sentido Anti-horário");
+  // else
+  //  Serial.println("Sentido Horário");
+
+   Serial.println(steeringEncoder.encoderVelocity(1000));
 
 }
 
