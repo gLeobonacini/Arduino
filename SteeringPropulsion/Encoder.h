@@ -1,10 +1,21 @@
+#define readPinA        bitRead(PIND,2)
+#define readPinB        bitRead(PIND,3)
+
+
+// Variáveis
+volatile long int contadorPassos = 0;
+long int contadorProtegido = 0;
+long int tempoInicial = 0;
+long int tempoAtual = 0;
+long int tempoDecorrido = 0;   
+
 class SensorEncoder{
 	// Atributos
 	private:
-		int pinAEncoder = 0;		            // Pino que liga ou desliga o motor
-	    int pinBEncoder = 0;					// Pino que inidica a sentido de rotação do motor
-		int pulses = 0;							// Quantidade de pulsos do encoder
-		float wheelDiameter = 0.0;				// Diâmetro da roda
+		  int pinAEncoder = 0;		            // Pino que liga ou desliga o motor
+	    int pinBEncoder = 0;					      // Pino que inidica a sentido de rotação do motor
+		  int pulses = 0;							        // Quantidade de pulsos do encoder
+		  float wheelDiameter = 0.0;				  // Diâmetro da roda
 	public:
 		// Construtor
 		SensorEncoder(int A, int B, int pulse, float diameter){
@@ -16,71 +27,48 @@ class SensorEncoder{
 
 		// Métodos
 		void configuration(){			// Configura os pinos
-			pinMode(pinAEncoder,INPUT);
-			pinMode(pinBEncoder,INPUT);
+			pinMode(pinAEncoder,INPUT_PULLUP);
+			pinMode(pinBEncoder,INPUT_PULLUP);
+      // Configurando as interrupções
+      noInterrupts();
 		}
 
-		bool directionEncoder(){			
+   int getPinA(){
+    return pinAEncoder;
+   }
+
+   int getPinB(){
+    return pinBEncoder;
+   }
+
+		bool goAhead(){			
 			// Verifica o sentido de rotação do motor:
-			// true -> Anti-horário 
-			// false -> Horário
-		
-			bool change = false;
-			bool actualStateA = digitalRead(pinAEncoder);
-			bool actualStateB = digitalRead(pinAEncoder);
-			bool previousStateA;
-			bool previousStateB;
-		
-			do{
-				previousStateA = actualStateA;
-				previousStateB = actualStateB;
-				actualStateA = digitalRead(pinAEncoder);
-				actualStateB = digitalRead(pinBEncoder);
-				if(actualStateA != previousStateA || actualStateB != previousStateB)
-					change = true;
-			}while(!change);
-		
-			if(previousStateA == 0 && previousStateB == 0){
-				if(actualStateA == 0)
-					return true;
-				else
-					return false;
-			}
-
-			else if(previousStateA == 0 && previousStateB == 1){
-				if(actualStateA == 1)
-					return true;
-				else
-					return false;
-			}	
-
-			else if(previousStateA == 1 && previousStateB == 1){
-				if(actualStateA == 1)
-					return true;
-				else
-					return false;
-			}	
-
-			else{
-				if(actualStateA == 0)
-					return true;
-				else
-					return false;
-			}
-
+			// true -> Para frente 
+			// false -> Para trás
+      contadorPassos = 0;
+      contadorProtegido = 0;
+      interrupts();
+      do{
+        contadorProtegido = contadorPassos;
+      }while(contadorProtegido == 0);
+		  noInterrupts();
+      return (contadorProtegido > 0);			
 		}
 
-		float encoderVelocity(int timeMillis){		
-			// Retorna a velocidade em diameterUnit/s
-			float count = 0.0;
-			int initialTime = millis();
-
-			do{
-				if(digitalRead(pinAEncoder) == 0 && digitalRead(pinBEncoder) == 0)
-					count++;
-			}while(initialTime + timeMillis > millis());
-	
-			//return ((count/pulses)*M_PI*wheelDiameter)/(timeMillis/1000); 
-      return count;
+		float velocity(int timeMillis){
+			contadorPassos = 0;
+			tempoInicial = millis();
+			interrupts();
+      do{
+        tempoAtual = millis();
+        if(tempoAtual < tempoInicial)
+          tempoDecorrido = 4294967295 - tempoInicial + tempoAtual;
+        else
+          tempoDecorrido = tempoAtual - tempoInicial;
+      }while(tempoDecorrido < timeMillis);
+      contadorProtegido = contadorPassos;
+      Serial.println(contadorProtegido);
+      noInterrupts();
+      return ((contadorProtegido/pulses)*M_PI*wheelDiameter)/(timeMillis/1000); 
 		}	
 };
